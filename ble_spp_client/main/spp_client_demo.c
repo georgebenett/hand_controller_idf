@@ -551,19 +551,21 @@ void uart_task(void *pvParameters)
     uart_event_t event;
     for (;;) {
         //Waiting for UART event.
-        if (xQueueReceive(spp_uart_queue, (void * )&event, (TickType_t)portMAX_DELAY)) {
-            switch (event.type) {
+        //if (xQueueReceive(spp_uart_queue, (void * )&event, (TickType_t)portMAX_DELAY)) {
+          //  switch (event.type) {
             //Event of UART receiving data
-            case UART_DATA:
-                if (event.size && (is_connect == true) && (db != NULL) && ((db+SPP_IDX_SPP_DATA_RECV_VAL)->properties & (ESP_GATT_CHAR_PROP_BIT_WRITE_NR | ESP_GATT_CHAR_PROP_BIT_WRITE))) {
+           // case UART_DATA:
+               // if (/* && */(is_connect == true) && (db != NULL) && ((db+SPP_IDX_SPP_DATA_RECV_VAL)->properties & (ESP_GATT_CHAR_PROP_BIT_WRITE_NR | ESP_GATT_CHAR_PROP_BIT_WRITE))) {
                     uint8_t * temp = NULL;
                     temp = (uint8_t *)malloc(sizeof(uint8_t)*event.size);
                     if(temp == NULL){
                         ESP_LOGE(GATTC_TAG, "malloc failed,%s L#%d", __func__, __LINE__);
                         break;
                     }
+                    event.size = 3;
                     memset(temp, 0x0, event.size);
-                    uart_read_bytes(UART_NUM_0,temp,event.size,portMAX_DELAY);
+                    sprintf((char *)temp, "%c%c%c", '#', '#', '1');
+                   // uart_read_bytes(UART_NUM_0,temp,event.size,portMAX_DELAY);
                     esp_ble_gattc_write_char( spp_gattc_if,
                                               spp_conn_id,
                                               (db+SPP_IDX_SPP_DATA_RECV_VAL)->attribute_handle,
@@ -572,12 +574,13 @@ void uart_task(void *pvParameters)
                                               ESP_GATT_WRITE_TYPE_RSP,
                                               ESP_GATT_AUTH_REQ_NONE);
                     free(temp);
-                }
-                break;
-            default:
-                break;
-            }
-        }
+              //  }
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
+            //    break;
+            //default:
+              // break;
+          //  }
+        //}
     }
     vTaskDelete(NULL);
 }

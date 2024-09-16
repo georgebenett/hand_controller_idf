@@ -517,8 +517,10 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     	case ESP_GATTS_WRITE_EVT: {
     	    res = find_char_and_desr_index(p_data->write.handle);
             if(p_data->write.is_prep == false){
-                ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_WRITE_EVT : handle = %d", res);
+                                    ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
                 if(res == SPP_IDX_SPP_COMMAND_VAL){
+                                    ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
+
                     uint8_t * spp_cmd_buff = NULL;
                     spp_cmd_buff = (uint8_t *)malloc((spp_mtu_size - 3) * sizeof(uint8_t));
                     if(spp_cmd_buff == NULL){
@@ -529,6 +531,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                     memcpy(spp_cmd_buff,p_data->write.value,p_data->write.len);
                     xQueueSend(cmd_cmd_queue,&spp_cmd_buff,10/portTICK_PERIOD_MS);
                 }else if(res == SPP_IDX_SPP_DATA_NTF_CFG){
+                                    ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
                     if((p_data->write.len == 2)&&(p_data->write.value[0] == 0x01)&&(p_data->write.value[1] == 0x00)){
                         enable_data_ntf = true;
                     }else if((p_data->write.len == 2)&&(p_data->write.value[0] == 0x00)&&(p_data->write.value[1] == 0x00)){
@@ -550,17 +553,26 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 #endif
                 else if(res == SPP_IDX_SPP_DATA_RECV_VAL){
 #ifdef SPP_DEBUG_MODE
+                                    ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
+
                     esp_log_buffer_char(GATTS_TABLE_TAG,(char *)(p_data->write.value),p_data->write.len);
+
 #else
+                    //ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_WRITE_EVT : handle = %s", res);
                     uart_write_bytes(UART_NUM_0, (char *)(p_data->write.value), p_data->write.len);
 #endif
                 }else{
                     //TODO:
+                ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
+                                    ESP_LOGI(GATTS_TABLE_TAG,"%s",(char *)(p_data->write.value));
+
+
                 }
             }else if((p_data->write.is_prep == true)&&(res == SPP_IDX_SPP_DATA_RECV_VAL)){
-                ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_PREP_WRITE_EVT : handle = %d", res);
+                ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
                 store_wr_buffer(p_data);
-            }
+            }else                 ESP_LOGI(GATTS_TABLE_TAG, "%d_ESP_GATTS_PREP_WRITE_EVT : handle = %d",__LINE__, res);
+
       	 	break;
     	}
     	case ESP_GATTS_EXEC_WRITE_EVT:{
